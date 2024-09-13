@@ -1,0 +1,6 @@
+[submodule "DarkBot"]
+	path = DarkBot
+	url = https://github.com/darkbot-reloaded/DarkBot
+[submodule "DarkBotAPI"]
+	path = DarkBotAPI
+	url = https://github.com/darkbot-reloaded/DarkBotAPI
