@@ -1,0 +1,13 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginHandler.java b/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginHandler.java
+index 7c924460..fb5ebedc 100644
+--- a/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginHandler.java
++++ b/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginHandler.java
+@@ -207,7 +207,7 @@ public class PluginHandler implements API.Singleton {
+             plugin.setDefinition(readPluginDefinition(jar.getInputStream(plJson)));
+             testUnique(plugin);
+             testCompatibility(plugin);
+-            testSignature(plugin, jar);
++            //testSignature(plugin, jar);
+             if (plugin.getDefinition().features.length != 0 || plugin.getBasePackage() == null) return null;
+             String basePackage = plugin.getBasePackage().replace('.', '/');
+             return StreamUtils.toStream(jar.entries())

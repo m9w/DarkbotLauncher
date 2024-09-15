@@ -1,0 +1,21 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginClassLoader.java b/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginClassLoader.java
+index a0b4dcb0..50c37767 100644
+--- a/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginClassLoader.java
++++ b/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginClassLoader.java
+@@ -36,11 +36,13 @@ public class PluginClassLoader extends URLClassLoader {
+         super(urls);
+     }
+ 
++    @SuppressWarnings("unused")
++    public Class<?> defineClass(String name, byte[] bytes) {
++        return super.defineClass(name, bytes, 0, bytes.length);
++    }
++
+     @Override
+     public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+-        if (PROTECTED.stream().anyMatch(p -> p.test(name)))
+-            throw new ClassNotFoundException(name + " is a protected class");
+-
+         return super.loadClass(name, resolve);
+     }
+ 

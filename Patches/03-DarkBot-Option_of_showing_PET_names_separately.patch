@@ -1,0 +1,38 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/config/types/suppliers/DisplayFlag.java b/src/main/java/com/github/manolo8/darkbot/config/types/suppliers/DisplayFlag.java
+index 898f15fe..a85b23c6 100644
+--- a/src/main/java/com/github/manolo8/darkbot/config/types/suppliers/DisplayFlag.java
++++ b/src/main/java/com/github/manolo8/darkbot/config/types/suppliers/DisplayFlag.java
+@@ -5,6 +5,7 @@ import eu.darkbot.api.config.annotations.Configuration;
+ @Configuration("config.bot_settings.map_display.toggle")
+ public enum DisplayFlag {
+     USERNAMES,
++    PET_NAMES,
+     NPC_NAMES,
+     HERO_NAME,
+     HP_SHIELD_NUM,
+diff --git a/src/main/java/com/github/manolo8/darkbot/gui/drawables/DynamicEntitiesDrawer.java b/src/main/java/com/github/manolo8/darkbot/gui/drawables/DynamicEntitiesDrawer.java
+index bae7bb34..d59833b5 100644
+--- a/src/main/java/com/github/manolo8/darkbot/gui/drawables/DynamicEntitiesDrawer.java
++++ b/src/main/java/com/github/manolo8/darkbot/gui/drawables/DynamicEntitiesDrawer.java
+@@ -185,7 +185,7 @@ public class DynamicEntitiesDrawer implements Drawable {
+ 
+             drawEntity(mg, pet, 4, false);
+ 
+-            if (mg.hasDisplayFlag(DisplayFlag.USERNAMES))
++            if (mg.hasDisplayFlag(DisplayFlag.PET_NAMES))
+                 mg.drawString(pet, pet.getEntityInfo().getUsername(), -6, MapGraphics.StringAlign.MID);
+         }
+     }
+diff --git a/src/main/resources/lang/strings_en.properties b/src/main/resources/lang/strings_en.properties
+index b6ed3d1d..a7ea9b13 100644
+--- a/src/main/resources/lang/strings_en.properties
++++ b/src/main/resources/lang/strings_en.properties
+@@ -270,6 +270,8 @@ config.bot_settings.map_display=Map display
+ config.bot_settings.map_display.toggle=Toggle displaying
+ config.bot_settings.map_display.toggle.usernames=Player usernames
+ config.bot_settings.map_display.toggle.usernames.desc=The usernames of others on the map
++config.bot_settings.map_display.toggle.pet_names=PET usernames
++config.bot_settings.map_display.toggle.pet_names.desc=The PET usernames of PET on the map
+ config.bot_settings.map_display.toggle.npc_names=Npc usernames
+ config.bot_settings.map_display.toggle.npc_names.desc=The usernames of npcs on the map
+ config.bot_settings.map_display.toggle.hero_name=Hero username

@@ -1,0 +1,12 @@
+diff --git a/api/src/main/java/eu/darkbot/api/config/types/DisplayFlag.java b/api/src/main/java/eu/darkbot/api/config/types/DisplayFlag.java
+index 71c345f..7d43769 100644
+--- a/api/src/main/java/eu/darkbot/api/config/types/DisplayFlag.java
++++ b/api/src/main/java/eu/darkbot/api/config/types/DisplayFlag.java
+@@ -5,6 +5,7 @@ import eu.darkbot.api.config.annotations.Configuration;
+ @Configuration("config.bot_settings.map_display.toggle")
+ public enum DisplayFlag {
+     USERNAMES,
++    PET_NAMES,
+     NPC_NAMES,
+     HERO_NAME,
+     HP_SHIELD_NUM,
