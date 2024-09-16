@@ -1,0 +1,54 @@
+diff --git a/api/src/main/java/eu/darkbot/api/events/EventHandler.java b/api/src/main/java/eu/darkbot/api/events/EventHandler.java
+index f215833..eba9527 100644
+--- a/api/src/main/java/eu/darkbot/api/events/EventHandler.java
++++ b/api/src/main/java/eu/darkbot/api/events/EventHandler.java
+@@ -19,4 +19,5 @@ import java.lang.annotation.Target;
+ @Retention(RetentionPolicy.RUNTIME)
+ @Target(ElementType.METHOD)
+ public @interface EventHandler {
++    String value() default "";
+ }
+diff --git a/api/src/main/java/eu/darkbot/api/managers/EventBrokerAPI.java b/api/src/main/java/eu/darkbot/api/managers/EventBrokerAPI.java
+index 51931c1..fc50a40 100644
+--- a/api/src/main/java/eu/darkbot/api/managers/EventBrokerAPI.java
++++ b/api/src/main/java/eu/darkbot/api/managers/EventBrokerAPI.java
+@@ -56,4 +56,5 @@ public interface EventBrokerAPI extends API.Singleton {
+      */
+     void unregisterListener(@NotNull Listener listener);
+ 
++    void sendEvent(@NotNull String event, String value);
+ }
+diff --git a/impl/src/main/java/eu/darkbot/impl/managers/EventBroker.java b/impl/src/main/java/eu/darkbot/impl/managers/EventBroker.java
+index 2db90ff..3161df9 100644
+--- a/impl/src/main/java/eu/darkbot/impl/managers/EventBroker.java
++++ b/impl/src/main/java/eu/darkbot/impl/managers/EventBroker.java
+@@ -77,8 +77,10 @@ public class EventBroker implements EventBrokerAPI {
+     private static class EventMethod {
+         private final Method method;
+         private final Class<?> clazz;
++        private final String event;
+ 
+         public EventMethod(Method method) {
++            event = method.getAnnotation(EventHandler.class).value();
+             if (method.getParameterCount() != 1 || !Event.class.isAssignableFrom(method.getParameterTypes()[0]))
+                 throw new IllegalArgumentException("@EventHandler must have a single event parameter: " + method);
+             this.method = method;
+@@ -87,9 +89,10 @@ public class EventBroker implements EventBrokerAPI {
+ 
+         @SuppressWarnings("PMD.AvoidCatchingThrowable")
+         public void handle(Listener listener, Event event) {
++            Object arg = event; if (event instanceof CustomEvent) { CustomEvent customEvent = (CustomEvent) event; if (this.event.equals(customEvent.event)) arg = customEvent.value; }
+             if (!clazz.isInstance(event)) return;
+             try {
+-                method.invoke(listener, event);
++                method.invoke(listener, arg);
+             } catch (Throwable e) {
+                 System.out.println("Exception passing " +
+                         event.getClass().getName() + " to " +
+@@ -98,4 +101,6 @@ public class EventBroker implements EventBrokerAPI {
+             }
+         }
+     }
++    @Override public synchronized void sendEvent(@NotNull String event, String value) { sendEvent(new CustomEvent(event, value)); }
++    private static class CustomEvent implements Event { String event; String value; CustomEvent(String event, String value) { this.event = event; this.value = value; } }
+ }
