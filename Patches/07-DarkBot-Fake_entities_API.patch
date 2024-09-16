@@ -1,0 +1,281 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/core/entities/Box.java b/src/main/java/com/github/manolo8/darkbot/core/entities/Box.java
+index ed56d92b..d5f8a8b2 100644
+--- a/src/main/java/com/github/manolo8/darkbot/core/entities/Box.java
++++ b/src/main/java/com/github/manolo8/darkbot/core/entities/Box.java
+@@ -1,9 +1,11 @@
+ package com.github.manolo8.darkbot.core.entities;
+ 
++import com.github.manolo8.darkbot.Main;
+ import com.github.manolo8.darkbot.config.BoxInfo;
+ import com.github.manolo8.darkbot.config.ConfigEntity;
+ import com.github.manolo8.darkbot.core.api.Capability;
+ import com.github.manolo8.darkbot.utils.Offsets;
++import eu.darkbot.api.game.other.Location;
+ import eu.darkbot.util.Timer;
+ import org.jetbrains.annotations.Nullable;
+ 
+@@ -26,6 +28,10 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
+     public BoxInfo boxInfo;
+ 
+ 
++    private Box(int id) {
++        super(id);
++    }
++
+     public Box(int id, long address) {
+         super(id);
+         this.update(address);
+@@ -135,4 +141,61 @@ public class Box extends Entity implements eu.darkbot.api.game.entities.Box {
+             super(id, address);
+         }
+     }
++
++    public static class FakeBox extends Box implements eu.darkbot.api.game.entities.FakeEntity.FakeBox {
++        private static int CURR_ID = Integer.MIN_VALUE;
++        private Timer timeout;
++        private long removeDistance;
++        private boolean isRemoveWhenAttemptSelect;
++
++        public FakeBox(String boxName, Location loc, long removeDistance, long keepAlive, boolean isRemoveWhenAttemptSelect) {
++            super(CURR_ID++);
++            super.locationInfo.updatePosition(loc.x(), loc.y());
++            super.main = Main.INSTANCE;
++            super.type = boxName;
++            super.boxInfo = ConfigEntity.INSTANCE.getOrCreateBoxInfo(type);
++            super.removed = false;
++            setRemoveDistance(removeDistance);
++            setTimeout(keepAlive);
++            setRemoveWhenAttemptSelect(isRemoveWhenAttemptSelect);
++        }
++
++        public void setTimeout(long keepAlive) {
++            if (keepAlive != -1) {
++                timeout = Timer.get(keepAlive);
++                timeout.activate();
++            }
++            else timeout = null;
++        }
++
++        public void setRemoveDistance(long removeDistance) {
++            this.removeDistance = removeDistance;
++        }
++
++        public void setRemoveWhenAttemptSelect(boolean removeWhenAttemptSelect) {
++            isRemoveWhenAttemptSelect = removeWhenAttemptSelect;
++        }
++
++        public String getHash() {
++            return type + locationInfo.getCurrent();
++        }
++
++        public boolean tryCollect() {
++            return trySelect(false);
++        }
++
++        public boolean isInvalid(long mapAddress) {
++            if (timeout != null && timeout.isInactive()) return true;
++            return Main.INSTANCE.hero.distanceTo(this) < removeDistance;
++        }
++
++        public boolean trySelect(boolean tryAttack) {
++            if (isRemoveWhenAttemptSelect) removed();
++            return false;
++        }
++
++        public void update() {}
++
++        public void update(long address) {}
++    }
+ }
+diff --git a/src/main/java/com/github/manolo8/darkbot/core/entities/Mine.java b/src/main/java/com/github/manolo8/darkbot/core/entities/Mine.java
+index 0d38050c..c8a7b0ee 100644
+--- a/src/main/java/com/github/manolo8/darkbot/core/entities/Mine.java
++++ b/src/main/java/com/github/manolo8/darkbot/core/entities/Mine.java
+@@ -1,8 +1,11 @@
+ package com.github.manolo8.darkbot.core.entities;
+ 
++import com.github.manolo8.darkbot.Main;
+ import com.github.manolo8.darkbot.core.itf.Obstacle;
+ import com.github.manolo8.darkbot.core.utils.pathfinder.AreaImpl;
+ import com.github.manolo8.darkbot.core.utils.pathfinder.CircleImpl;
++import eu.darkbot.api.game.other.Location;
++import eu.darkbot.util.Timer;
+ 
+ import static com.github.manolo8.darkbot.Main.API;
+ 
+@@ -14,6 +17,10 @@ public class Mine extends Entity implements Obstacle, eu.darkbot.api.game.entiti
+ 
+     private final CircleImpl area = new CircleImpl(0, 0, 200);
+ 
++    private Mine(int id) {
++        super(id);
++    }
++
+     public Mine(int id, long address) {
+         super(id);
+         this.update(address);
+@@ -58,4 +65,42 @@ public class Mine extends Entity implements Obstacle, eu.darkbot.api.game.entiti
+     public int getTypeId() {
+         return typeId;
+     }
++
++    public static class FakeMine extends Mine implements eu.darkbot.api.game.entities.FakeEntity.FakeMine {
++        private static int CURR_ID = Integer.MIN_VALUE;
++        private Timer timeout;
++        private long removeDistance;
++
++        public FakeMine(int typeId, Location loc, long removeDistance, long keepAlive) {
++            super(CURR_ID++);
++            super.locationInfo.updatePosition(loc.x(), loc.y());
++            super.main = Main.INSTANCE;
++            super.typeId = typeId;
++            super.area.set(locationInfo.now, typeId == FROZEN_LAB_MINE ? 500 : 200);
++            super.removed = false;
++            setTimeout(keepAlive);
++            setRemoveDistance(removeDistance);
++        }
++
++        public void setTimeout(long keepAlive) {
++            if (keepAlive != -1) {
++                timeout = Timer.get(keepAlive);
++                timeout.activate();
++            }
++            else timeout = null;
++        }
++
++        public void setRemoveDistance(long removeDistance) {
++            this.removeDistance = removeDistance;
++        }
++
++        public boolean isInvalid(long mapAddress) {
++            if (timeout != null && timeout.isInactive()) return true;
++            return removeDistance == -1 || Main.INSTANCE.hero.distanceTo(this) < removeDistance;
++        }
++
++        public void update() {}
++
++        public void update(long address) {}
++    }
+ }
+diff --git a/src/main/java/com/github/manolo8/darkbot/core/entities/Npc.java b/src/main/java/com/github/manolo8/darkbot/core/entities/Npc.java
+index 9fe64c7a..6943f764 100644
+--- a/src/main/java/com/github/manolo8/darkbot/core/entities/Npc.java
++++ b/src/main/java/com/github/manolo8/darkbot/core/entities/Npc.java
+@@ -1,8 +1,12 @@
+ package com.github.manolo8.darkbot.core.entities;
+ 
++import com.github.manolo8.darkbot.Main;
+ import com.github.manolo8.darkbot.config.ConfigEntity;
+ import com.github.manolo8.darkbot.config.NpcInfo;
+ import com.github.manolo8.darkbot.core.manager.EffectManager;
++import eu.darkbot.api.game.entities.FakeEntity;
++import eu.darkbot.api.game.other.Location;
++import eu.darkbot.util.Timer;
+ 
+ import java.util.Objects;
+ 
+@@ -53,4 +57,58 @@ public class Npc extends Ship implements eu.darkbot.api.game.entities.Npc {
+     public int getShipId() {
+         return getNpcId();
+     }
++
++    public static class FakeNpc extends Npc implements FakeEntity.FakeShip {
++        private static int CURR_ID = Integer.MIN_VALUE;
++        private Timer timeout;
++        private long removeDistance;
++        private boolean isRemoveWhenAttemptSelect;
++
++        public FakeNpc(String npcName, Location loc, long removeDistance, long keepAlive, boolean isRemoveWhenAttemptSelect) {
++            super(CURR_ID++);
++            this.npcInfo = ConfigEntity.INSTANCE.getOrCreateNpcInfo(npcName);
++            setLocation(loc);
++            setRemoveDistance(removeDistance);
++            setTimeout(keepAlive);
++            setRemoveWhenAttemptSelect(isRemoveWhenAttemptSelect);
++        }
++
++        @Override
++        public void setRemoveWhenAttemptSelect(boolean removeWhenAttemptSelect) {
++            isRemoveWhenAttemptSelect = removeWhenAttemptSelect;
++        }
++
++        @Override
++        public void setLocation(Location loc) {
++            locationInfo.updatePosition(loc.x(), loc.y());
++        }
++
++        @Override
++        public void setTimeout(long keepAlive) {
++            if (keepAlive != -1) {
++                timeout = Timer.get(keepAlive);
++                timeout.activate();
++            }
++            else timeout = null;
++        }
++
++        @Override
++        public void setRemoveDistance(long distance) {
++            removeDistance = distance;
++        }
++
++        public boolean trySelect(boolean tryAttack) {
++            if (isRemoveWhenAttemptSelect) removed();
++            return false;
++        }
++
++        public boolean isInvalid(long mapAddress) {
++            if (timeout != null && timeout.isInactive()) return true;
++            return Main.INSTANCE.hero.distanceTo(this) < removeDistance;
++        }
++
++        public void update() {}
++
++        public void update(long address) {}
++    }
+ }
+diff --git a/src/main/java/com/github/manolo8/darkbot/core/utils/EntityList.java b/src/main/java/com/github/manolo8/darkbot/core/utils/EntityList.java
+index 018d9e86..f2f48b5e 100644
+--- a/src/main/java/com/github/manolo8/darkbot/core/utils/EntityList.java
++++ b/src/main/java/com/github/manolo8/darkbot/core/utils/EntityList.java
+@@ -23,6 +23,7 @@ import com.github.manolo8.darkbot.core.itf.Updatable;
+ import com.github.manolo8.darkbot.core.objects.swf.FlashListLong;
+ import com.github.manolo8.darkbot.core.utils.factory.EntityFactory;
+ import com.github.manolo8.darkbot.core.utils.factory.EntityRegistry;
++import eu.darkbot.api.game.entities.FakeEntity;
+ import eu.darkbot.api.game.entities.Mist;
+ import eu.darkbot.api.game.entities.Station;
+ import eu.darkbot.api.managers.EntitiesAPI;
+@@ -128,6 +129,24 @@ public class EntityList extends Updatable implements EntitiesAPI {
+         this.eventBroker.sendEvent(new EntityCreateEvent(entity));
+     }
+ 
++    public FakeEntity.FakeMine createFakeMine(int typeId, eu.darkbot.api.game.other.Location  loc, long removeDistance, long keepAlive) {
++        return register(new Mine.FakeMine(typeId, loc, removeDistance, keepAlive), mines);
++    }
++
++    public FakeEntity.FakeBox createFakeBox(String boxName, eu.darkbot.api.game.other.Location loc, long removeDistance, long keepAlive, boolean removeIfAttemptSelect) {
++        return register(new Box.FakeBox(boxName, loc, removeDistance, keepAlive, removeIfAttemptSelect), boxes);
++    }
++
++    public FakeEntity.FakeShip createFakeNpc(String npcName, eu.darkbot.api.game.other.Location loc, long removeDistance, long keepAlive, boolean removeIfAttemptSelect) {
++        return register(new Npc.FakeNpc(npcName, loc, removeDistance, keepAlive, removeIfAttemptSelect), npcs);
++    }
++
++    private <T extends Entity> T register(T entity, Collection<? super T> collection) {
++        collection.add(entity);
++        onEntityCreate(entity);
++        return entity;
++    }
++
+     @SuppressWarnings("unchecked")
+     private <T extends Entity> List<T> register(EntityFactory... types) {
+         List<T> list = new ArrayList<>();
+@@ -155,7 +174,7 @@ public class EntityList extends Updatable implements EntitiesAPI {
+         for (Iterator<Entity> it = all.iterator(); it.hasNext(); ) {
+             Entity entity = it.next();
+ 
+-            if (entity.isInvalid(address) || entity.address == main.hero.address || entity.address == main.hero.pet.address) {
++            if (entity.isInvalid(address) || entity.address == main.hero.address || (entity.address == main.hero.pet.address && entity.address != 0)) {
+                 it.remove();
+                 entity.removed();
+                 ids.remove(entity.id);
