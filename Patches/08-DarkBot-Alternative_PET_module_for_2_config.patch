@@ -1,0 +1,39 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/config/Config.java b/src/main/java/com/github/manolo8/darkbot/config/Config.java
+index 6cf20b58..a4debd91 100644
+--- a/src/main/java/com/github/manolo8/darkbot/config/Config.java
++++ b/src/main/java/com/github/manolo8/darkbot/config/Config.java
+@@ -173,6 +173,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
+     public static class PetSettings {
+         public @Option boolean ENABLED = false;
+         public @Option @Dropdown(options = PetGears.class) PetGear MODULE_ID = PetGear.PASSIVE;
++        public @Option @Dropdown(options = PetGears.class) PetGear MODULE_ID2 = PetGear.PASSIVE;
+     }
+ 
+     public @Option GroupSettings GROUP = new GroupSettings();
+diff --git a/src/main/java/com/github/manolo8/darkbot/core/manager/PetManager.java b/src/main/java/com/github/manolo8/darkbot/core/manager/PetManager.java
+index adfb66c2..835be1d2 100644
+--- a/src/main/java/com/github/manolo8/darkbot/core/manager/PetManager.java
++++ b/src/main/java/com/github/manolo8/darkbot/core/manager/PetManager.java
+@@ -118,7 +118,7 @@ public class PetManager extends Gui implements PetAPI {
+ 
+         if (gear != null)
+             return gear;
+-        gear = main.config.PET.MODULE_ID;
++        gear = main.hero.config == 1 ? main.config.PET.MODULE_ID : main.config.PET.MODULE_ID2;
+ 
+         return gear == null ? PetGear.PASSIVE : gear;
+     }
+diff --git a/src/main/resources/lang/strings_en.properties b/src/main/resources/lang/strings_en.properties
+index b6ed3d1d..89781bb1 100644
+--- a/src/main/resources/lang/strings_en.properties
++++ b/src/main/resources/lang/strings_en.properties
+@@ -173,7 +173,8 @@ config.loot.npc_table.extra.opposite_config.desc=Use opposite config on this NPC
+ config.pet=PET
+ config.pet.enabled=Use PET
+ config.pet.enabled.desc=If disabled, bot will ignore all PET functions
+-config.pet.module_id=PET module
++config.pet.module_id=PET module for 1 config
++config.pet.module_id2=PET module for 2 config
+ config.pet.module.desc=The list will update to your modules if your PET is on
+ 
+ config.group=Group
