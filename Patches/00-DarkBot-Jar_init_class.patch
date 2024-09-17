@@ -14,25 +14,25 @@ index 00000000..78fffa14
 +import java.util.zip.ZipFile;
 +
 +public class Init {
-+	public static void main(String[] args) throws IOException, InterruptedException {
-+		File container = new File(Init.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-+		System.out.println(container);
-+		try (ZipFile zipFile = new ZipFile(container)) {
-+			zipFile.entries().asIterator().forEachRemaining(zipEntry -> {
-+				String name = zipEntry.getName();
-+				if (name.equals("Init.class") || name.startsWith("META-INF")) return;
-+				if (zipEntry.isDirectory()) new File(name).mkdirs();
-+				else try (OutputStream os = new FileOutputStream(name)) {
-+					zipFile.getInputStream(zipEntry).transferTo(os);
-+				} catch (IOException ignored) {
-+				}
-+			});
-+		}
++    public static void main(String[] args) throws IOException, InterruptedException {
++        File container = new File(Init.class.getProtectionDomain().getCodeSource().getLocation().getPath());
++        try (ZipFile zipFile = new ZipFile(container)) {
++            zipFile.entries().asIterator().forEachRemaining(zipEntry -> {
++                String name = "core" + zipEntry.getName();
++                if (name.equals("Init.class")) return;
++                if (zipEntry.isDirectory()) new File(name).mkdirs();
++                else try (OutputStream os = new FileOutputStream(name)) {
++                    zipFile.getInputStream(zipEntry).transferTo(os);
++                } catch (IOException ignored) {
++                }
++            });
++        }
 +
-+		String java = System.getProperty("java.home") + "/bin/javaw";
-+		List<String> s = new ArrayList<>();
-+		s.addAll(Arrays.asList(java, "-cp", "\".core/API.jar;.core/\"", "com.github.manolo8.darkbot.Bot"));
-+		s.addAll(Arrays.asList(args));
-+		Runtime.getRuntime().exec(String.join(" ", s));
-+	}
++        String java = System.getProperty("java.home") + "/bin/javaw";
++        List<String> s = new ArrayList<>();
++        s.addAll(Arrays.asList(java, "-cp", "\"core/API.jar;core/\"", "com.github.manolo8.darkbot.Bot"));
++        if(new File("bot.properties").isFile()) s.add("@bot.properties");
++        s.addAll(Arrays.asList(args));
++        Runtime.getRuntime().exec(String.join(" ", s));
++    }
 +}
