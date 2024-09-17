@@ -1,6 +1,6 @@
 diff --git a/src/main/java/Init.java b/src/main/java/Init.java
 new file mode 100644
-index 00000000..78fffa14
+index 00000000..c480fafb
 --- /dev/null
 +++ b/src/main/java/Init.java
 @@ -0,0 +1,32 @@
@@ -18,8 +18,9 @@ index 00000000..78fffa14
 +        File container = new File(Init.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 +        try (ZipFile zipFile = new ZipFile(container)) {
 +            zipFile.entries().asIterator().forEachRemaining(zipEntry -> {
-+                String name = "core" + zipEntry.getName();
-+                if (name.equals("Init.class")) return;
++                String name = zipEntry.getName();
++                if (zipEntry.getName().equals("Init.class") || name.startsWith("META-INF")) return;
++                name = "core/" + name;
 +                if (zipEntry.isDirectory()) new File(name).mkdirs();
 +                else try (OutputStream os = new FileOutputStream(name)) {
 +                    zipFile.getInputStream(zipEntry).transferTo(os);
@@ -29,10 +30,9 @@ index 00000000..78fffa14
 +        }
 +
 +        String java = System.getProperty("java.home") + "/bin/javaw";
-+        List<String> s = new ArrayList<>();
-+        s.addAll(Arrays.asList(java, "-cp", "\"core/API.jar;core/\"", "com.github.manolo8.darkbot.Bot"));
-+        if(new File("bot.properties").isFile()) s.add("@bot.properties");
-+        s.addAll(Arrays.asList(args));
-+        Runtime.getRuntime().exec(String.join(" ", s));
++        List<String> argsProc = new ArrayList<>(Arrays.asList(java, "-cp", "\"core/dependencies.jar;core/\""));
++        argsProc.add(new File("bot.properties").isFile() ? "@bot.properties" : "com.github.manolo8.darkbot.Bot");
++        argsProc.addAll(Arrays.asList(args));
++        Runtime.getRuntime().exec(String.join(" ", argsProc));
 +    }
 +}

@@ -60,19 +60,20 @@ object BuildManager {
             zipOut.putNextEntry(ZipEntry("META-INF/MANIFEST.MF"))
             zipOut.writer().apply { write("Manifest-Version: 1.0\r\nMain-Class: Init\r\n\r\n") }.flush()
             zipOut.closeEntry()
-
+            val pathSet = listOf("eu", "com/github/manolo8", "Init", "META-INF")
             ZipFile(botJar).apply {
                 entries().asSequence().forEach {
-                    getInputStream(it).apply {
-                        zipOut.putNextEntry(ZipEntry(if (it.name == "Init.class") it.name else ".core/" + it.name))
-                        copyTo(zipOut)
-                        zipOut.closeEntry()
-                    }
+                    if (pathSet.any { p -> it.name.startsWith(p) } && !it.name.startsWith("META-INF"))
+                        getInputStream(it).apply {
+                            zipOut.putNextEntry(ZipEntry(it.name))
+                            copyTo(zipOut)
+                            zipOut.closeEntry()
+                        }
                 }
             }
 
             val entries = HashSet<String>()
-            zipOut.putNextEntry(ZipEntry(".core/API.jar"))
+            zipOut.putNextEntry(ZipEntry("dependencies.jar"))
             ZipOutputStream(zipOut).use { zipApiOut ->
                 apiJars.map(::ZipFile).forEach { zipApiFile ->
                     zipApiFile.entries().asSequence().filter { entries.add(it.name) }.forEach {
@@ -80,6 +81,17 @@ object BuildManager {
                             zipApiOut.putNextEntry(ZipEntry(it.name))
                             copyTo(zipApiOut)
                             zipApiOut.closeEntry()
+                        }
+                    }
+                }
+
+                ZipFile(botJar).apply {
+                    entries().asSequence().forEach {
+                        if ( pathSet.none { p -> it.name.startsWith(p) })
+                            getInputStream(it).apply {
+                                zipApiOut.putNextEntry(ZipEntry(it.name))
+                                copyTo(zipApiOut)
+                                zipApiOut.closeEntry()
                         }
                     }
                 }
