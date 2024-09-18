@@ -10,11 +10,13 @@ import com.github.m9w.launcher.properties.LauncherProperties
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.Image
 import javax.swing.*
 
 
 object GUI {
     private var currentPatchList: List<Patch> = emptyList()
+    private val icon: Image = ImageIcon(GUI.javaClass.getResource("/icon.png")).image
 
     init {
         UIManager.put("MenuItem.selectionType", "underline")
@@ -33,6 +35,7 @@ object GUI {
         val frame = JFrame("Darkbot launcher builder")
         frame.pack()
         frame.setSize(350, 600)
+        frame.iconImage = icon
         frame.setLocationRelativeTo(null)
         frame.layout = BorderLayout()
 
