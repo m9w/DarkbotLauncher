@@ -1,0 +1,126 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/Bot.java b/src/main/java/com/github/manolo8/darkbot/Bot.java
+index b8d822b6..e76b3971 100644
+--- a/src/main/java/com/github/manolo8/darkbot/Bot.java
++++ b/src/main/java/com/github/manolo8/darkbot/Bot.java
+@@ -23,6 +23,7 @@ import java.security.ProtectionDomain;
+ public class Bot {
+ 
+     public static void main(String[] args) throws IOException {
++        Hooks.beforeMain(args);
+         // You can enable hardware acceleration via adding jvm arg: -Dsun.java2d.opengl=True
+         try {
+             setupSecurityPolicy();
+diff --git a/src/main/java/com/github/manolo8/darkbot/Hooks.java b/src/main/java/com/github/manolo8/darkbot/Hooks.java
+new file mode 100644
+index 00000000..f3e44f48
+--- /dev/null
++++ b/src/main/java/com/github/manolo8/darkbot/Hooks.java
+@@ -0,0 +1,88 @@
++package com.github.manolo8.darkbot;
++
++import com.github.manolo8.darkbot.utils.ThrowFunction;
++
++import java.io.IOException;
++import java.io.InputStream;
++import java.lang.annotation.Annotation;
++import java.lang.annotation.ElementType;
++import java.lang.annotation.Retention;
++import java.lang.annotation.RetentionPolicy;
++import java.lang.annotation.Target;
++import java.lang.reflect.Method;
++import java.util.Arrays;
++import java.util.Collection;
++import java.util.HashSet;
++import java.util.Objects;
++import java.util.Set;
++import java.util.function.Function;
++import java.util.stream.Collectors;
++import java.util.stream.Stream;
++
++public class Hooks {
++	private static final Collection<Method> hooks = getHooks();
++	public static String[] args;
++
++	public static void beforeMain(String[] args) {
++		Hooks.args = args;
++		applyHook(BeforeMain.class);
++	}
++
++	public static void applyHook(Class<?extends Annotation> annotationClass) {
++		getHooks(annotationClass).map(skipException(m -> m.invoke(null))).collect(Collectors.toSet());
++	}
++
++	private static Stream<Method> getHooks(Class<?extends Annotation> annotationClass) {
++		return hooks.stream().filter(m -> m.isAnnotationPresent(annotationClass)).sorted();
++	}
++
++	private static Collection<Method> getHooks() {
++		Set<Method> hooks = new HashSet<>();
++		try {
++			Hooks.class.getClassLoader().getResources("class.inject").asIterator().forEachRemaining(url -> {
++				try (InputStream is = url.openStream()) {
++					hooks.addAll(Arrays.stream(new String(is.readAllBytes()).split("\\s"))
++							.map(String::trim)
++							.filter(s -> !s.isEmpty())
++							.map(skipException(Class::forName))
++							.filter(Objects::nonNull)
++							.map(Class::getMethods)
++							.flatMap(Arrays::stream)
++							.filter(m -> m.getParameterCount() == 0)
++							.collect(Collectors.toSet()));
++				} catch (Exception e) {
++					e.printStackTrace();
++				}
++			});
++		} catch (IOException e) {
++			throw new RuntimeException(e);
++		}
++		return hooks;
++	}
++
++	private static <T, R> Function<T, R> skipException(ThrowFunction<T, R, ?> f) {
++		return a -> {
++			try {
++				return f.apply(a);
++			} catch (Throwable t) {
++				t.printStackTrace();
++				return null;
++			}
++		};
++	}
++
++	@Target(ElementType.METHOD)
++	@Retention(RetentionPolicy.RUNTIME)
++	public @interface BeforeMain {
++	}
++
++	@Target(ElementType.METHOD)
++	@Retention(RetentionPolicy.RUNTIME)
++	public @interface BeforeApiInit {
++	}
++
++	@Target(ElementType.METHOD)
++	@Retention(RetentionPolicy.RUNTIME)
++	public @interface AfterApiInit {
++	}
++}
+diff --git a/src/main/java/com/github/manolo8/darkbot/Main.java b/src/main/java/com/github/manolo8/darkbot/Main.java
+index 71fd9978..b6786112 100644
+--- a/src/main/java/com/github/manolo8/darkbot/Main.java
++++ b/src/main/java/com/github/manolo8/darkbot/Main.java
+@@ -146,6 +146,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
+         VerifierChecker.getAuthApi().setupAuth();
+         this.pluginAPI.addInstance(VerifierChecker.getAuthApi());
+ 
++        Hooks.applyHook(Hooks.BeforeApiInit.class);
+         this.starManager     = pluginAPI.requireInstance(StarManager.class);
+         this.mapManager      = pluginAPI.requireInstance(MapManager.class);
+         this.settingsManager = pluginAPI.requireInstance(SettingsManager.class);
+@@ -162,6 +163,7 @@ public class Main extends Thread implements PluginListener, BotAPI {
+         this.repairManager   = pluginAPI.requireInstance(RepairManager.class);
+         this.botInstaller = pluginAPI.requireInstance(BotInstaller.class);
+         this.eventBroker = pluginAPI.requireAPI(EventBrokerAPI.class);
++        Hooks.applyHook(Hooks.AfterApiInit.class);
+ 
+         API = configManager.getAPI(pluginAPI);
+         API.setSize(config.BOT_SETTINGS.API_CONFIG.width, config.BOT_SETTINGS.API_CONFIG.height);
