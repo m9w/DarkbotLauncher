@@ -1,25 +1,28 @@
 diff --git a/src/main/java/Init.java b/src/main/java/Init.java
 new file mode 100644
-index 00000000..c480fafb
+index 00000000..c856a55a
 --- /dev/null
 +++ b/src/main/java/Init.java
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,44 @@
 +import java.io.File;
 +import java.io.FileOutputStream;
 +import java.io.IOException;
 +import java.io.OutputStream;
-+import java.util.Arrays;
 +import java.util.ArrayList;
 +import java.util.List;
++import java.util.prefs.Preferences;
++import java.util.stream.Collectors;
 +import java.util.zip.ZipFile;
++
 +
 +public class Init {
 +    public static void main(String[] args) throws IOException, InterruptedException {
++        Preferences.userRoot().node("/eu/darkbot/verifier").putLong("DBOT_FIRST_RUN", Long.MAX_VALUE);
 +        File container = new File(Init.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 +        try (ZipFile zipFile = new ZipFile(container)) {
 +            zipFile.entries().asIterator().forEachRemaining(zipEntry -> {
 +                String name = zipEntry.getName();
-+                if (zipEntry.getName().equals("Init.class") || name.startsWith("META-INF")) return;
++                if (name.equals("Init.class") || name.startsWith("META-INF")) return;
 +                name = "core/" + name;
 +                if (zipEntry.isDirectory()) new File(name).mkdirs();
 +                else try (OutputStream os = new FileOutputStream(name)) {
@@ -30,9 +33,18 @@ index 00000000..c480fafb
 +        }
 +
 +        String java = System.getProperty("java.home") + "/bin/javaw";
-+        List<String> argsProc = new ArrayList<>(Arrays.asList(java, "-cp", "\"core/dependencies.jar;core/\""));
++
++        List<String> params = System.getProperties().entrySet().stream().filter(it -> {
++            char x = it.getKey().toString().charAt(0);
++            return x < 'a' || x > 'z';
++        }).map(it -> "-D" + it.getKey() + "=" + it.getValue()).collect(Collectors.toList());
++
++        List<String> argsProc = new ArrayList<>(List.of(java));
++        argsProc.addAll(params);
++        argsProc.addAll(List.of("-cp", "\"core/dependencies.jar;core/\""));
++
 +        argsProc.add(new File("bot.properties").isFile() ? "@bot.properties" : "com.github.manolo8.darkbot.Bot");
-+        argsProc.addAll(Arrays.asList(args));
++        argsProc.addAll(List.of(args));
 +        Runtime.getRuntime().exec(String.join(" ", argsProc));
 +    }
 +}
