@@ -1,0 +1,54 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/config/PlayerInfo.java b/src/main/java/com/github/manolo8/darkbot/config/PlayerInfo.java
+index c4b272f1..de25aa78 100644
+--- a/src/main/java/com/github/manolo8/darkbot/config/PlayerInfo.java
++++ b/src/main/java/com/github/manolo8/darkbot/config/PlayerInfo.java
+@@ -4,14 +4,19 @@ import eu.darkbot.api.game.entities.Player;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
++import java.awt.Color;
+ import java.time.Instant;
+ import java.util.Collection;
+ import java.util.HashMap;
++import java.util.List;
+ import java.util.Locale;
+ import java.util.Map;
+ import java.util.Objects;
+ 
+ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
++    public PlayerTag MMO = PlayerTag.getTag("MMO", new Color(255,0,0)),
++                     EIC = PlayerTag.getTag("EIC", new Color(0,0,255)),
++                     VRU = PlayerTag.getTag("VRU", new Color(0,255,0));
+     public String username;
+     public int userId;
+ 
+@@ -19,7 +24,7 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
+ 
+     public Map<PlayerTag, Long> subscriptions = new HashMap<>();
+ 
+-    private transient PlayerTags tags = null;
++    private final transient PlayerTags tags = new PlayerTagsImpl();
+ 
+     public PlayerInfo() {}
+ 
+@@ -30,6 +35,12 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
+ 
+     public PlayerInfo(Player player) {
+         this(player.getEntityInfo().getUsername(), player.getId());
++        subscriptions.entrySet().removeIf(it -> List.of(MMO, EIC, VRU).contains(it.getKey()));
++        switch (player.getEntityInfo().getFaction()) {
++            case MMO: tags.add(MMO); break;
++            case EIC: tags.add(EIC); break;
++            case VRU: tags.add(VRU); break;
++        }
+     }
+ 
+     public void setTag(PlayerTag tag, Long until) {
+@@ -76,7 +87,6 @@ public class PlayerInfo implements eu.darkbot.api.config.types.PlayerInfo {
+ 
+     @Override
+     public PlayerTags getTags() {
+-        if (tags == null) tags = new PlayerTagsImpl();
+         return tags;
+     }
+ 
