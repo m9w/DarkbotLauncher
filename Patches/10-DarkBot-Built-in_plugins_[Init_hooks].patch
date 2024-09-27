@@ -1,0 +1,54 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/extensions/features/BuiltInPlugins.java b/src/main/java/com/github/manolo8/darkbot/extensions/features/BuiltInPlugins.java
+new file mode 100644
+index 00000000..318d6ad0
+--- /dev/null
++++ b/src/main/java/com/github/manolo8/darkbot/extensions/features/BuiltInPlugins.java
+@@ -0,0 +1,40 @@
++package com.github.manolo8.darkbot.extensions.features;
++
++import com.github.manolo8.darkbot.Hooks;
++import com.github.manolo8.darkbot.Main;
++import com.github.manolo8.darkbot.extensions.plugins.Plugin;
++import com.github.manolo8.darkbot.extensions.plugins.PluginDefinition;
++import com.github.manolo8.darkbot.extensions.plugins.PluginHandler;
++import com.github.manolo8.darkbot.extensions.plugins.PluginListener;
++import com.google.gson.Gson;
++
++import java.io.IOException;
++import java.io.InputStreamReader;
++import java.lang.reflect.Type;
++
++public class BuiltInPlugins implements PluginListener {
++	private static final Gson GSON = new Gson();
++
++	@Hooks.BeforeApiInit
++	public static void beforeApiInit() {
++		new PluginHandler(null).addListener(new BuiltInPlugins());
++	}
++
++	@Override
++	public void afterLoad() {
++		try {
++			Hooks.class.getClassLoader().getResources("plugin.json").asIterator().forEachRemaining( url -> {
++				Plugin plugin = new Plugin(null, null);
++				try (InputStreamReader reader = new InputStreamReader(url.openStream())) {
++					PluginDefinition definition = GSON.fromJson(reader, (Type) PluginDefinition.class);
++					plugin.setDefinition(definition);
++					Main.INSTANCE.pluginHandler.LOADED_PLUGINS.add(plugin);
++				} catch (IOException e) {
++					throw new RuntimeException(e);
++				}
++			});
++		} catch (IOException e) {
++			throw new RuntimeException(e);
++		}
++	}
++}
+diff --git a/src/main/resources/hooks/plugin.json b/src/main/resources/hooks/plugin.json
+new file mode 100644
+index 00000000..22ad53e3
+--- /dev/null
++++ b/src/main/resources/hooks/plugin.json
+@@ -0,0 +1 @@
++com.github.manolo8.darkbot.extensions.features.BuiltInPlugins
+\ No newline at end of file
