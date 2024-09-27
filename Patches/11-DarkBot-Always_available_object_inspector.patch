@@ -1,0 +1,13 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/gui/titlebar/ExtraButton.java b/src/main/java/com/github/manolo8/darkbot/gui/titlebar/ExtraButton.java
+index 4807f06d..3d9793ad 100644
+--- a/src/main/java/com/github/manolo8/darkbot/gui/titlebar/ExtraButton.java
++++ b/src/main/java/com/github/manolo8/darkbot/gui/titlebar/ExtraButton.java
+@@ -164,7 +164,7 @@ public class ExtraButton extends TitleBarButton<JFrame> {
+                 list.add(createSeparator("Dev stuff"));
+                 list.add(create("Save SWF", e -> main.addTask(SWFUtils::dumpMainSWF)));
+                 list.add(create("Reset keybinds", e -> main.addTask(() -> main.guiManager.settingsGui.setKeyBinds(false))));
+-                list.add(create("Object inspector", e -> {
++            }{    list.add(create("Object inspector", e -> {
+                     JFrame frame = new ObjectInspectorUI((JMenuItem) e.getSource());
+                     frame.setSize(800, 600);
+                     frame.setVisible(true);
