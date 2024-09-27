@@ -20,6 +20,7 @@ object PatchManager {
         .distinctBy { it.name }.sortedBy { it.prefix }.toList()
 
     fun applyPatch(patch: Patch, revert: Boolean = false) {
+        if (!patch.isActive) return
         val revertFlag = if (revert) " -R " else ""
         patch.files.forEach { (prj, patchFile) ->
             val patchPath = "Patches/${patchFile.name}"
