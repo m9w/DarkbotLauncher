@@ -44,11 +44,11 @@ index 00000000..318d6ad0
 +		}
 +	}
 +}
-diff --git a/src/main/resources/hooks/plugin.json b/src/main/resources/hooks/plugin.json
+diff --git a/src/main/resources/builtin/class.inject b/src/main/resources/builtin/class.inject
 new file mode 100644
 index 00000000..22ad53e3
 --- /dev/null
-+++ b/src/main/resources/hooks/plugin.json
++++ b/src/main/resources/builtin/class.inject
 @@ -0,0 +1 @@
 +com.github.manolo8.darkbot.extensions.features.BuiltInPlugins
 \ No newline at end of file
