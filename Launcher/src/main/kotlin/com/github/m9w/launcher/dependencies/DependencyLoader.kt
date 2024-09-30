@@ -7,13 +7,13 @@ import java.net.URL
 import java.util.zip.ZipFile
 
 object DependencyLoader {
-    private val GRAAL_VM_URL = LauncherProperties.getProperty("GRAAL_VM_URL")
+    private val GRAAL_VM_URL = LauncherProperties.getProperty("GRAAL_VM_URL", "https://download.oracle.com/graalvm/17/latest/graalvm-jdk-17_windows-x64_bin.zip")
 
     private const val GRAAL_VM_PATH = "GraalVM"
 
     fun loadGraalVM() {
         val graalVMPath = LauncherProperties.getProperty(GRAAL_VM_PATH, "")
-        if (graalVMPath.isNotEmpty() && !File("graalVMPath${File.separator}bin${File.separator}java.exe").isFile) {
+        if (graalVMPath.isNotEmpty() && File("$graalVMPath${File.separator}bin${File.separator}java.exe").isFile) {
             println("GraalVM: exist - $graalVMPath")
             return
         }
