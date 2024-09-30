@@ -15,7 +15,7 @@ object BuildManager {
 
     fun build(version: String, patches: List<Patch>) {
         run("git submodule update")
-        File("build").mkdirs()
+        File("release").mkdirs()
         patches.forEach(PatchManager::applyPatch)
         val apiJars = buildAPI()
         val botJar = buildBot()
@@ -55,7 +55,7 @@ object BuildManager {
     }
 
     private fun createBuild(apiJars: List<File>, botJar: File, version: String): File {
-        val target = File("build/CustomDarkBot-$version.jar")
+        val target = File("release/CustomDarkBot-$version.jar")
         ZipOutputStream(FileOutputStream(target)).use { zipOut ->
             zipOut.putNextEntry(ZipEntry("META-INF/MANIFEST.MF"))
             zipOut.writer().apply { write("Manifest-Version: 1.0\r\nMain-Class: Init\r\n\r\n") }.flush()
