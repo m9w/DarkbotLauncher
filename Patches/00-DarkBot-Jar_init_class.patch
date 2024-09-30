@@ -1,9 +1,9 @@
 diff --git a/src/main/java/Init.java b/src/main/java/Init.java
 new file mode 100644
-index 00000000..2a6260e0
+index 00000000..ce65d1cb
 --- /dev/null
 +++ b/src/main/java/Init.java
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,53 @@
 +import java.io.File;
 +import java.io.FileOutputStream;
 +import java.io.IOException;
@@ -41,11 +41,11 @@ index 00000000..2a6260e0
 +
 +        List<String> argsProc = new ArrayList<>(List.of(java));
 +
-+        String dbg = System.getProperty("dbg");
++        String dbg = System.getProperty("bg");
 +        if (dbg != null) {
 +            String port = dbg.split(":")[0];
 +            boolean wait = dbg.endsWith("y");
-+            argsProc.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=+" + (wait ? "y" : "n") + "+,address=*:" + port);
++            argsProc.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=" + (wait ? "y" : "n") + ",address=*:" + port);
 +        }
 +        argsProc.addAll(params);
 +
@@ -53,6 +53,7 @@ index 00000000..2a6260e0
 +
 +        argsProc.add(new File("bot.properties").isFile() ? "@bot.properties" : "com.github.manolo8.darkbot.Bot");
 +        argsProc.addAll(List.of(args));
-+        Runtime.getRuntime().exec(String.join(" ", argsProc));
++        if (dbg != null) System.err.println(String.join(" ", argsProc));
++        System.out.println("<pid>"+Runtime.getRuntime().exec(argsProc.toArray(String[]::new)).pid()+"</pid>");
 +    }
 +}
