@@ -1,13 +1,15 @@
 diff --git a/src/main/java/Init.java b/src/main/java/Init.java
 new file mode 100644
-index 00000000..ce65d1cb
+index 00000000..333a5ad1
 --- /dev/null
 +++ b/src/main/java/Init.java
-@@ -0,0 +1,53 @@
+@@ -0,0 +1,63 @@
 +import java.io.File;
 +import java.io.FileOutputStream;
 +import java.io.IOException;
 +import java.io.OutputStream;
++import java.nio.file.Files;
++import java.nio.file.Path;
 +import java.util.ArrayList;
 +import java.util.List;
 +import java.util.prefs.Preferences;
@@ -33,6 +35,14 @@ index 00000000..ce65d1cb
 +        }
 +
 +        String java = System.getProperty("java.home") + "/bin/javaw";
++
++        String tag = System.getProperty("tag");
++
++        if (tag != null) {
++            if (!new File(java + tag + ".exe").isFile())
++                Files.copy(Path.of(java + ".exe"), Path.of(java + tag + ".exe"));
++            java += tag;
++        }
 +
 +        List<String> params = System.getProperties().entrySet().stream().filter(it -> {
 +            char x = it.getKey().toString().charAt(0);
