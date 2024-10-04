@@ -1,0 +1,59 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/utils/StartupParams.java b/src/main/java/com/github/manolo8/darkbot/utils/StartupParams.java
+index e963e690..99b5dbcb 100644
+--- a/src/main/java/com/github/manolo8/darkbot/utils/StartupParams.java
++++ b/src/main/java/com/github/manolo8/darkbot/utils/StartupParams.java
+@@ -64,7 +64,7 @@ public class StartupParams implements API.Singleton {
+     }
+ 
+     public enum PropertyKey {
+-        USERNAME, PASSWORD, MASTER_PASSWORD, SERVER, SID, ALLOW_STORE_SID;
++        USERNAME, PASSWORD, MASTER_PASSWORD, SERVER, SID, ALLOW_STORE_SID, EXTERNAL;
+         @Override
+         public String toString() {
+             return this.name().toLowerCase(Locale.ROOT);
+@@ -172,6 +172,8 @@ public class StartupParams implements API.Singleton {
+             return Boolean.parseBoolean(getProperty(PropertyKey.ALLOW_STORE_SID));
+         }
+ 
++        public String getExternal() { return getProperty(PropertyKey.EXTERNAL); }
++
+         public boolean shouldSIDLogin() {
+             return !Strings.isEmpty(getSID()) && !Strings.isEmpty(getServer());
+         }
+diff --git a/src/main/java/com/github/manolo8/darkbot/utils/login/LoginData.java b/src/main/java/com/github/manolo8/darkbot/utils/login/LoginData.java
+index dbdbe032..61c940bf 100644
+--- a/src/main/java/com/github/manolo8/darkbot/utils/login/LoginData.java
++++ b/src/main/java/com/github/manolo8/darkbot/utils/login/LoginData.java
+@@ -20,7 +20,7 @@ public class LoginData {
+     private int userId;
+     @Getter
+     private String username, password, sid, url, fullUrl, preloaderUrl;
+-
++    public String external;
+     public void setCredentials(String username, String password, BiConsumer<String, String> onSetSid) {
+         this.username = username;
+         this.password = password;
+diff --git a/src/main/java/com/github/manolo8/darkbot/utils/login/LoginUtils.java b/src/main/java/com/github/manolo8/darkbot/utils/login/LoginUtils.java
+index 14796c09..7fdfa265 100644
+--- a/src/main/java/com/github/manolo8/darkbot/utils/login/LoginUtils.java
++++ b/src/main/java/com/github/manolo8/darkbot/utils/login/LoginUtils.java
+@@ -76,6 +76,7 @@ public class LoginUtils {
+ 
+         LoginData loginData = new LoginData();
+         loginData.setCredentials(params.getUsername(), password, null);
++        loginData.external = params.getExternal();
+ 
+         System.out.println("Auto logging in using " + (params.shouldSIDLogin() ? "server & SID" : "user & password") + " (1/2)");
+         try {
+@@ -137,6 +138,11 @@ public class LoginUtils {
+     }
+ 
+     private static void usernameLogin(LoginData loginData, String domain) throws IOException {
++        if (loginData.external != null) {
++            @SuppressWarnings("unchecked") Map<String, String> args = Http.create(loginData.external, Method.POST).setParam("username", loginData.getUsername()).setParam("password", loginData.getPassword()).fromJson(Map.class);
++            loginData.setSid(args.get("sid"), args.get("domain"));
++            return;
++        }
+         URL url = new URL("https://" + domain + ".darkorbit.com/");
+         String frontPage = IOUtils.read(Http.create(url.toString()).getInputStream());
+ 
