@@ -102,6 +102,6 @@ object BuildManager {
 
     private fun runGradle(path: String, args: String): String {
         val absPath = File("$path/gradle/wrapper/gradle-wrapper.jar").absolutePath
-        return run("${javaBin}java -Xmx64m -Xms64m -cp \"$absPath\" org.gradle.wrapper.GradleWrapperMain --console plain $args", path)
+        return run("${javaBin}java -Xmx64m -Xms64m -cp \"$absPath\" org.gradle.wrapper.GradleWrapperMain --warning-mode none --console plain $args", path)
     }
 }
