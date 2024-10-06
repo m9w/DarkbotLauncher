@@ -1,0 +1,46 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/gui/titlebar/TrayButton.java b/src/main/java/com/github/manolo8/darkbot/gui/titlebar/TrayButton.java
+index 582c0220..9cbf5027 100644
+--- a/src/main/java/com/github/manolo8/darkbot/gui/titlebar/TrayButton.java
++++ b/src/main/java/com/github/manolo8/darkbot/gui/titlebar/TrayButton.java
+@@ -4,6 +4,10 @@ import com.github.manolo8.darkbot.Main;
+ import com.github.manolo8.darkbot.gui.MainGui;
+ import com.github.manolo8.darkbot.gui.utils.UIUtils;
+ import com.github.manolo8.darkbot.utils.I18n;
++import eu.darkbot.api.events.EventHandler;
++import eu.darkbot.api.events.Listener;
++import eu.darkbot.api.managers.EventBrokerAPI;
++import eu.darkbot.impl.managers.EventBroker;
+ import org.jetbrains.annotations.Nullable;
+ 
+ import javax.swing.*;
+@@ -14,7 +18,7 @@ import java.awt.event.FocusEvent;
+ import java.awt.event.MouseAdapter;
+ import java.awt.event.MouseEvent;
+ 
+-public class TrayButton extends TitleBarButton<JFrame> {
++public class TrayButton extends TitleBarButton<JFrame> implements Listener {
+ 
+     private final Main main;
+     // Default PopupMenu for TrayIcon has no look & feel, forcing us to use a JPopupMenu
+@@ -31,6 +35,7 @@ public class TrayButton extends TitleBarButton<JFrame> {
+         setVisible(SystemTray.isSupported());
+ 
+         this.main = main;
++        main.pluginAPI.requireAPI(EventBrokerAPI.class).registerListener(this);
+         popupMenu = new JPopupMenu("DarkBot");
+         rebuildPopup();
+         dialog = createDialog();
+@@ -119,4 +124,13 @@ public class TrayButton extends TitleBarButton<JFrame> {
+         frame.setVisible(false);
+     }
+ 
++    @EventHandler("UI_MINIMIZE")
++    void handler(EventBroker.CustomEvent event) {
++        String action = event.value;
++        if ("HIDE".equals(action)) actionPerformed(null);
++        else if ("SHOW".equals(action)) {
++            SystemTray.getSystemTray().remove(icon);
++            frame.setVisible(true);
++        }
++    }
+ }
