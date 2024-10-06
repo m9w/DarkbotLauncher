@@ -26,6 +26,7 @@ repositories {
 
 dependencies {
     compileOnly("org.jetbrains:annotations:24.1.0")
+    api("org.jetbrains.kotlin:kotlin-reflect:2.0.20")
     getDependencies("DarkBot").forEach { api(it) }
 }
 
