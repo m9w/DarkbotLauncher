@@ -14,7 +14,7 @@ fun getDependencies(project: String): List<String> {
         .split("\r?\n".toRegex())
         .filter { it.startsWith("+---") || it.startsWith("\\---")}
         .map { it.substring(5).trim(',').replace("\\s\\(.\\)$".toRegex(),"")}
-        .filter { !it.startsWith("project :") }
+        .filter { !it.startsWith("project ") }
 }
 
 repositories {
@@ -27,7 +27,7 @@ repositories {
 dependencies {
     compileOnly("org.jetbrains:annotations:24.1.0")
     api("org.jetbrains.kotlin:kotlin-reflect:2.0.20")
-    getDependencies("DarkBot").forEach { api(it) }
+    getDependencies("DarkBot").filter { !it.contains("darkbotapi", true) }.forEach { api(it) }
 }
 
 kotlin {
