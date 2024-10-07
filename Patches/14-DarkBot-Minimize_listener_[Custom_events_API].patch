@@ -37,7 +37,7 @@ index 582c0220..878e0ce9 100644
      }
 
 +    @CustomEventHandler("UI_MINIMIZE")
-+    void handler(String action) {
++    public void handler(String action) {
 +        if ("HIDE".equals(action)) actionPerformed(null);
 +        else if ("SHOW".equals(action)) {
 +            SystemTray.getSystemTray().remove(icon);
