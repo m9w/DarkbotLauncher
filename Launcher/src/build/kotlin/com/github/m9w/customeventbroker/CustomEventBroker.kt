@@ -35,7 +35,8 @@ object CustomEventBroker {
     @Synchronized
     fun registerListener(listener: Listener) {
         if (dispatchers.containsKey(listener)) unregisterListener(listener)
-        if (eventsBeingSent == 0) dispatchers[listener] = listener::class.members.mapNotNull { prepare(listener, it) }
+        if (eventsBeingSent == 0) listener::class.members.mapNotNull { prepare(listener, it) }
+                                    .let { if(it.isNotEmpty()) dispatchers[listener] = it }
         else toAdd.add(listener)
     }
 

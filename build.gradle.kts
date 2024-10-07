@@ -27,6 +27,7 @@ repositories {
 dependencies {
     compileOnly("org.jetbrains:annotations:24.1.0")
     api("org.jetbrains.kotlin:kotlin-reflect:2.0.20")
+    api("io.netty:netty-buffer:4.1.112.Final")
     getDependencies("DarkBot").filter { !it.contains("darkbotapi", true) }.forEach { api(it) }
 }
 

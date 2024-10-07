@@ -1,0 +1,10 @@
+{
+  "name": "Launcher integration plugin",
+  "author": "m9w",
+  "version": "0.0.1",
+  "minVersion": "1.0",
+  "supportedVersion": "1.0",
+  "features": [
+    "com.github.m9w.plugin.RootFeature"
+  ]
+}

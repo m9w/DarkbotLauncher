@@ -10,6 +10,7 @@ import java.nio.channels.SelectionKey.*
 import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 
@@ -28,12 +29,13 @@ class SimpleRouter(val port: Int = 44567) : Closeable {
         Thread {
             while (true) {
                 try {
-                    selector.select ({
+                    selector.select {
                         if (it.isValid && it.isAcceptable) onAccept()
                         if (it.isValid && it.isConnectable) onConnect(it)
                         if (it.isValid && it.isReadable) onRead(it)
                         if (it.isValid && it.isWritable) onWrite(it)
-                    }, 100)
+                    }
+                    Thread.sleep(10)
                 } catch (e: Exception) {
                     Thread.sleep(100)
                 }
@@ -69,6 +71,10 @@ class SimpleRouter(val port: Int = 44567) : Closeable {
         selector.keys().forEach { it.attachment().apply { if (this is Router) put(bytes) } }
     }
 
+    fun sendAll(event: String, message: String) {
+        sendAll(encode(event) + 58 + encode(message) + 10)
+    }
+
     private inner class Router : Closeable {
         private val buffer = PooledByteBufAllocator.DEFAULT.buffer()
         private val sendQueue = LinkedList<ByteBuffer>()
@@ -80,7 +86,7 @@ class SimpleRouter(val port: Int = 44567) : Closeable {
             val numRead = channel.read(buffer.nioBuffer(buffer.writerIndex(), 1024))
             if (numRead == -1) throw IOException()
             buffer.writerIndex(buffer.writerIndex() + numRead)
-            val offset = buffer.indexOf(buffer.writerIndex(), buffer.readerIndex(), '\n'.code.toByte()) + 1
+            val offset = buffer.indexOf(buffer.writerIndex(), buffer.readerIndex(), 10) + 1
             if (offset == 0) return
             val data = ByteArray(offset)
             buffer.readBytes(data)
@@ -111,4 +117,8 @@ class SimpleRouter(val port: Int = 44567) : Closeable {
         selector.close()
         server.close()
     }
+
+    private fun encode(s: String): ByteArray = Base64.getEncoder().encode(s.toByteArray(StandardCharsets.UTF_8))
+
+    private fun decode(s: String?): String = String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8)
 }

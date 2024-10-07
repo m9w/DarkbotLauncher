@@ -7,6 +7,8 @@ import com.github.m9w.launcher.properties.LauncherProperties
 import com.google.gson.Gson
 import java.io.File
 import java.util.function.Consumer
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 import kotlin.reflect.KProperty1
 
 object ClientManager {
@@ -82,7 +84,8 @@ object ClientManager {
                 updatesListeners[Client::flags]?.accept(flags)
             }
 
-        private var pid = -1
+        private var pid = readPid()
+        val unique get() = pid.toString().take(10).padStart(10, '0')
 
         private val updatesListeners = LinkedHashMap<KProperty1<Client, *>, Consumer<Any>>()
 
@@ -191,14 +194,30 @@ object ClientManager {
             localPlugins.listFiles { _, s -> s.endsWith(".jar") && !plugins.contains(s.substring(0, s.length - 4)) }?.forEach { it.delete() }
         }
 
-        fun stop() {}
+        private fun readPid(): Int {
+            val f = File(dir, "curr.pid")
+            if (!f.isFile) return -1
+            return try {
+                String(f.readBytes()).takeWhile { it.isDigit() }.toInt()
+            } catch (e: Exception) {
+                return -1
+            }
+        }
 
-        fun show() {}
+        fun stop() {
+            getRouter().sendAll("?$unique!LAUNCHER", "STOP")
+        }
 
-        fun hide() {}
+        fun show() {
+            getRouter().sendAll("?$unique!LAUNCHER", "SHOW")
+        }
+
+        fun hide() {
+            getRouter().sendAll("?$unique!LAUNCHER", "HIDE")
+        }
 
         fun extractConfig(name: String) {
-            //todo send event store config
+            getRouter().sendAll("?$unique!LAUNCHER", "STORE_CONFIG")
             File(dir, "config.json").apply {
                 if (!isFile) throw RuntimeException("Client hasn't config")
                 val target = File(configsDir, "$name.json")

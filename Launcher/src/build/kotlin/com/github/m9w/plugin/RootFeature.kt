@@ -1,0 +1,31 @@
+package com.github.m9w.plugin
+
+import com.github.m9w.customeventbroker.CustomEvent
+import com.github.m9w.customeventbroker.CustomEventHandler
+import com.github.m9w.intergation.CustomEventRoutingHandler
+import eu.darkbot.api.events.Listener
+import eu.darkbot.api.extensions.Feature
+import eu.darkbot.api.extensions.Task
+
+@Feature(name = "Launcher integration", description = "", enabledByDefault = true)
+class RootFeature : Task, Listener {
+    private var shouldMinimize = System.getProperty("TRAY") == "true"
+
+    override fun onTickTask() {
+        if(shouldMinimize) {
+            CustomEvent("UI_MINIMIZE", "HIDE")
+            shouldMinimize = false
+            System.setProperty("TRAY", "false")
+        }
+        CustomEventRoutingHandler.onTickTask()
+    }
+
+    override fun onBackgroundTick() {
+        CustomEventRoutingHandler.onBackgroundTick()
+    }
+
+    @CustomEventHandler("RUNTIME")
+    fun handler (value: String) {
+        if(value == "STOP") Runtime.getRuntime().exit(0)
+    }
+}
