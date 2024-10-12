@@ -13,7 +13,7 @@ class RootFeature : Task, Listener {
 
     override fun onTickTask() {
         if(shouldMinimize) {
-            CustomEvent("UI_MINIMIZE", "HIDE")
+            CustomEvent("LAUNCHER", "HIDE")
             shouldMinimize = false
             System.setProperty("TRAY", "false")
         }
@@ -24,7 +24,7 @@ class RootFeature : Task, Listener {
         CustomEventRoutingHandler.onBackgroundTick()
     }
 
-    @CustomEventHandler("RUNTIME")
+    @CustomEventHandler("LAUNCHER")
     fun handler (value: String) {
         if(value == "STOP") Runtime.getRuntime().exit(0)
     }

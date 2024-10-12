@@ -17,7 +17,7 @@ dependencies {
     api("com.google.code.gson:gson:2.11.0")
     api("com.miglayout:miglayout-swing:11.4.2")
     api("io.netty:netty-buffer:4.1.112.Final")
-    //api("eu.darkbot.DarkBotAPI:darkbot-impl:0.9.5")
+    api("org.jetbrains.kotlin:kotlin-reflect:2.0.20")
 }
 
 kotlin {

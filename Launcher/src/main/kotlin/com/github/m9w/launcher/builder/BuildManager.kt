@@ -4,10 +4,6 @@ import com.github.m9w.launcher.patches.Patch
 import com.github.m9w.launcher.patches.PatchManager
 import com.github.m9w.launcher.properties.LauncherProperties
 import java.io.File
-import java.io.FileOutputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import java.util.zip.ZipOutputStream
 
 
 object BuildManager {
@@ -31,7 +27,7 @@ object BuildManager {
             val inp = String(process.inputStream.readBytes())
             val err = String(process.errorStream.readBytes())
             out.append(inp).append(err)
-            if (LauncherProperties.debug) print(inp)
+            if (LauncherProperties.debug) println(inp)
             System.err.print(err)
         } while (process.isAlive)
         return out.toString()

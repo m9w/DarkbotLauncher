@@ -9,6 +9,10 @@ import java.io.File
 import java.util.function.Consumer
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
+import kotlin.properties.Delegates
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 
 object ClientManager {
@@ -41,48 +45,13 @@ object ClientManager {
     }
 
     class ClientImpl(val client: Client) {
-        var name get() = client.name
-            set(value) {
-                client.name = rename(value)
-                store()
-                updatesListeners[Client::name]?.accept(name)
-            }
-        var version get() = client.version
-            set(value) {
-                client.version = value
-                store()
-                updatesListeners[Client::version]?.accept(version)
-            }
-        var jvmID get() = client.jvmID
-            set(value) {
-                client.jvmID = value
-                store()
-                updatesListeners[Client::jvmID]?.accept(jvmID)
-            }
-        var account get() = client.account
-            set(value) {
-                client.account = value
-                store()
-                updatesListeners[Client::account]?.accept(account)
-            }
-        var config get() = client.config
-            set(value) {
-                client.config = value
-                store()
-                updatesListeners[Client::config]?.accept(config)
-            }
-        var plugins get() = client.plugins
-            set(value) {
-                client.plugins.sync(value)
-                store()
-                updatesListeners[Client::plugins]?.accept(plugins)
-            }
-        var flags get() = client.flags
-            set(value) {
-                client.flags.sync(value)
-                store()
-                updatesListeners[Client::flags]?.accept(flags)
-            }
+        var name by linkedTo(client::name) { client.name = rename(it) }
+        var version by linkedTo(client::version)
+        var jvmID by linkedTo(client::jvmID)
+        var account by linkedTo(client::account)
+        var config by linkedTo(client::config)
+        var plugins by linkedTo(client::plugins) { client.plugins.sync(it) }
+        var flags by linkedTo(client::flags) { client.flags.sync(it) }
 
         private var pid = readPid()
         val unique get() = pid.toString().take(10).padStart(10, '0')
@@ -227,10 +196,23 @@ object ClientManager {
         }
 
         fun remove() = clients.remove(this).apply { store() }
+
+        private fun <T : Any> linkedTo(prop: KProperty<T>, store: Consumer<T>): ReadWriteProperty<Any, T> {
+            return Delegates.observable(prop.call()) { property, oldValue, newValue ->
+                if (oldValue.hashCode() == newValue.hashCode()) return@observable
+                if (LauncherProperties.debug) println(prop.name + " changed from $oldValue to $newValue")
+                store.accept(newValue)
+                store()
+                updatesListeners[property]?.accept(newValue)
+            }
+        }
+
+        private fun <T : Any> linkedTo(prop: KMutableProperty0<T>): ReadWriteProperty<Any, T> {
+            return linkedTo(prop, prop::set)
+        }
     }
 
-    fun store() {
-        println("storing data")
+    private fun store() {
         LauncherProperties.apply {
             clients.forEachIndexed { i, client -> setProperty("client_$i", gson.toJson(client.client)) }
             generateSequence (clients.size) { if (remove("client_${it}") != null) it + 1 else null }.toList()
