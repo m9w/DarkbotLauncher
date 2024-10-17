@@ -41,7 +41,7 @@ fun main(args: Array<String>) {
     }
     argsProc += System.getProperties().filter { e -> !e.key.toString()[0].isLowerCase() }.map { "-D" + it.key + "=" + it.value }
     argsProc += listOf("-cp", "\"core/;${container.name}\"")
-    argsProc += if (File("bot.properties").isFile()) "@bot.properties" else "com.github.manolo8.darkbot.Bot"
+    argsProc += if (File("bot.ini").isFile()) "@bot.ini" else "com.github.manolo8.darkbot.Bot"
     argsProc += args
     if (dbg.isNotEmpty()) System.err.println(argsProc.joinToString(" "))
     println("<pid>" + Runtime.getRuntime().exec(argsProc.toTypedArray()).pid() + "</pid>")

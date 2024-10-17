@@ -136,6 +136,12 @@ object ClientManager {
             if (!config.isFile) throw RuntimeException("Config $name corrupted")
             val target = File(dir, "config.json")
             config.copyTo(target, true)
+            val propName = "$config.ini"
+            val props = File(configsDir, propName)
+            if (!props.isFile) return
+            val propTarget = File(dir, "bot.ini")
+            props.copyTo(propTarget, true)
+
         }
 
         private fun accountPreparation(): Boolean {
