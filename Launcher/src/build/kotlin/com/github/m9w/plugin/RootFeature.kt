@@ -1,15 +1,25 @@
 package com.github.m9w.plugin
 
+import com.github.m9w.ReflectTool
 import com.github.m9w.customeventbroker.CustomEvent
 import com.github.m9w.customeventbroker.CustomEventHandler
 import com.github.m9w.intergation.CustomEventRoutingHandler
+import com.github.manolo8.darkbot.Main
+import com.github.manolo8.darkbot.gui.MainGui
+import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar
+import com.github.manolo8.darkbot.gui.titlebar.TrayButton
 import eu.darkbot.api.events.Listener
 import eu.darkbot.api.extensions.Feature
 import eu.darkbot.api.extensions.Task
+import java.awt.SystemTray
+import java.awt.TrayIcon
 
 @Feature(name = "Launcher integration", description = "", enabledByDefault = true)
 class RootFeature : Task, Listener {
     private var shouldMinimize = System.getProperty("TRAY") == "true"
+    private val gui get() = Main.INSTANCE.gui
+    private val trayButton: TrayButton get() = (gui.jMenuBar as MainTitleBar).components.find { it is TrayButton } as TrayButton
+    private val icon: TrayIcon get() = ReflectTool.of(trayButton).getField("icon")
 
     override fun onTickTask() {
         if(shouldMinimize) {
@@ -32,7 +42,11 @@ class RootFeature : Task, Listener {
     }
 
     @CustomEventHandler("LAUNCHER")
-    fun handler (value: String) {
-        if(value == "STOP") Runtime.getRuntime().exit(0)
+    fun handler(action: String) {
+        when (action) {
+            "STOP" -> Runtime.getRuntime().exit(0)
+            "HIDE" -> if(gui.isVisible) trayButton.actionPerformed(null)
+            "SHOW" -> { SystemTray.getSystemTray().remove(icon); gui.isVisible = true }
+        }
     }
 }
