@@ -21,7 +21,11 @@ object ConfigMangerEvents : Listener {
     fun onLauncherChangeConfigEvent(config: String) {
         ReflectTool.of(configManager).setField("failedConfig", true)
         File(config).copyTo(configManager.configFile.toFile(), true)
-        Main.INSTANCE.configHandler.setConfigProfile(configManager.configName)
+        val cfg = Main.INSTANCE.configChange
+        val current = configManager.configName
+        ReflectTool.of(configManager).setField("configName", "")
+        cfg.value = ""
+        cfg.send(current)
     }
 
     @CustomEventHandler("LAUNCHER!STORE_CONFIG")

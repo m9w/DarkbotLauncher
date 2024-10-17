@@ -17,11 +17,18 @@ class RootFeature : Task, Listener {
             shouldMinimize = false
             System.setProperty("TRAY", "false")
         }
-        CustomEventRoutingHandler.onTickTask()
+        customEventHandler()
     }
 
     override fun onBackgroundTick() {
+        customEventHandler()
         CustomEventRoutingHandler.onBackgroundTick()
+    }
+
+    private fun customEventHandler() {
+        synchronized(CustomEventRoutingHandler) {
+            CustomEventRoutingHandler.onTickTask()
+        }
     }
 
     @CustomEventHandler("LAUNCHER")

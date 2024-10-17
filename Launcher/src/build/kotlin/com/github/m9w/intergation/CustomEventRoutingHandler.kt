@@ -93,8 +93,11 @@ object CustomEventRoutingHandler : Listener {
         if (offset == 0) return
         val data = ByteArray(offset).also(buffer::readBytes)
         val i = data.indexOf(58)
-        CustomEvent(decode(String(data, 0, i)), decode(String(data, i + 1, data.size - i - 2)))
-        if (buffer.readableBytes() == 0) buffer.clear()
+        try {
+            CustomEvent(decode(String(data, 0, i)), decode(String(data, i + 1, data.size - i - 2)))
+        } finally {
+            if (buffer.readableBytes() == 0) buffer.clear()
+        }
     }
 
     @CustomEventHandler(regEx = "^!|^\\?\\d{10}!.*")

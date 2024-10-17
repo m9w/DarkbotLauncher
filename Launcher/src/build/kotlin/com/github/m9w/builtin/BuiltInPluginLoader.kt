@@ -14,7 +14,7 @@ object BuiltInPluginLoader: PluginListener {
     private val GSON = Gson()
 
     override fun afterLoad() {
-        return ClasspathScanner.getAllResourcesFromClasspath().filter { it.endsWith("plugin.json") }
+        ClasspathScanner.getAllResourcesFromClasspath().filter { it.endsWith("plugin.json") }
             .flatMap { BuiltInPluginLoader::class.java.classLoader.getResources(it).asSequence() }
             .map { it.openStream() }
             .forEach {
