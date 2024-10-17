@@ -20,13 +20,11 @@ object HooksHandler {
 
     fun afterApiInit() = applyHook<AfterApiInit>()
 
-    private inline fun <reified T : Annotation> applyHook() {
-        getHooks<T>().sorted().forEach { it.run() }
-    }
-
-    private inline fun <reified T : Annotation> getHooks(): Stream<Runnable> {
-        return hooks.filter { it.second.hasAnnotation<T>() }.map { it.first }.stream()
-    }
+    private inline fun <reified T : Annotation> applyHook() =
+        hooks.filter { it.second.hasAnnotation<T>() }
+             .sortedBy { it.second.hashCode() }
+             .map { it.first }
+             .forEach { it.run() }
 
     private fun getHooks(): Collection<Pair<Runnable, KCallable<*>>> {
         try {

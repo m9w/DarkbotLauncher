@@ -29,12 +29,9 @@ object ClientManager {
         LauncherProperties.apply {
             var i = 0
             for (cli in generateSequence { getProperty("client_${i++}") } )
-                clients.add(ClientImpl(gson.fromJson(cli, Client::class.java)))
+                gson.fromJson(cli, Client::class.java).let(::ClientImpl).let(clients::add)
         }
-        if(!releaseDir.isDirectory) releaseDir.mkdirs()
-        if(!configsDir.isDirectory) configsDir.mkdirs()
-        if(!pluginsDir.isDirectory) pluginsDir.mkdirs()
-        if(!accountsDir.isDirectory) accountsDir.mkdirs()
+        listOf(releaseDir, configsDir, pluginsDir, accountsDir).filter { !it.isDirectory }.forEach { it.mkdirs() }
     }
 
     fun newClient(): ClientImpl {
@@ -45,11 +42,11 @@ object ClientManager {
     }
 
     class ClientImpl(val client: Client) {
-        var name by linkedTo(client::name) { client.name = rename(it) }
+        var name by linkedTo(client::name, this::rename)
         var version by linkedTo(client::version)
         var jvmID by linkedTo(client::jvmID)
         var account by linkedTo(client::account)
-        var config by linkedTo(client::config)
+        var config by linkedTo(client::config, this::changeConfig)
         var plugins by linkedTo(client::plugins) { client.plugins.sync(it) }
         var flags by linkedTo(client::flags) { client.flags.sync(it) }
 
@@ -64,7 +61,7 @@ object ClientManager {
 
         private val dir get() = File(space, name)
 
-        private fun rename(newName: String): String {
+        private fun rename(newName: String) {
             var new = newName.trim()
             if (new.isEmpty()) new = "(empty)"
             val names = clients.filter { it !== this }.map { it.name }
@@ -79,7 +76,7 @@ object ClientManager {
             } catch (t: Throwable) {
                 t.printStackTrace()
             }
-            return new
+            client.name = new
         }
 
         fun clone(): ClientImpl {
@@ -185,14 +182,13 @@ object ClientManager {
             getRouter().sendAll("?$unique!LAUNCHER", "HIDE")
         }
 
-        fun extractConfig(name: String) {
-            getRouter().sendAll("?$unique!LAUNCHER", "STORE_CONFIG")
-            File(dir, "config.json").apply {
-                if (!isFile) throw RuntimeException("Client hasn't config")
-                val target = File(configsDir, "$name.json")
-                if (target.isFile) throw RuntimeException("Config with this name already exist")
-                copyTo(target)
-            }
+        fun extractConfig(config: String) {
+            getRouter().sendAll("?$unique!LAUNCHER!STORE_CONFIG", File(configsDir, "$config.json").absolutePath)
+        }
+
+        private fun changeConfig(config: String) {
+            client.config = config
+            getRouter().sendAll("?$unique!LAUNCHER!CHANGE_CONFIG", File(configsDir, "$config.json").absolutePath)
         }
 
         fun remove() = clients.remove(this).apply { store() }
