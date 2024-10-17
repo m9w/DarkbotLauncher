@@ -140,19 +140,19 @@ object Launcher : JPanel(MigLayout("wrap 2, ins 0", "5px[right]10px:push[grow,fi
         init {
             columns.forEach { panel.add(it, "grow,h 30px") }
             name.onFocusLost { client.name = it }
-            client.addListener(Client::name) { name.text = it }
+            client.addListener(ClientManager.ClientImpl::name) { name.text = it }
             jvmId.onFocusLost { client.jvmID = it }
-            client.addListener(Client::jvmID) { jvmId.text = it }
+            client.addListener(ClientManager.ClientImpl::jvmID) { jvmId.text = it }
             version.onFocusLost { client.version = it }
-            client.addListener(Client::version) { version.apply(it) }
+            client.addListener(ClientManager.ClientImpl::version) { version.apply(it) }
             account.onFocusLost { client.account = it }
-            client.addListener(Client::account) { account.apply(it) }
+            client.addListener(ClientManager.ClientImpl::account) { account.apply(it) }
             config.onFocusLost { client.config = it }
-            client.addListener(Client::config) { config.apply(it) }
+            client.addListener(ClientManager.ClientImpl::config) { config.apply(it) }
             plugins.onFocusLost { client.plugins = plugins.getSelected().toMutableSet() }
-            client.addListener(Client::plugins) { plugins.apply(it) }
+            client.addListener(ClientManager.ClientImpl::plugins) { plugins.apply(it) }
             flags.onFocusLost { client.flags = flags.getSelected().map(ClientFlags::valueOf).toMutableSet() }
-            client.addListener(Client::flags) { flags.apply(it.map { row -> row.name }) }
+            client.addListener(ClientManager.ClientImpl::flags) { flags.apply(it.map { row -> row.name }) }
             clientRows.add(this)
             panel.revalidate()
         }
@@ -165,7 +165,7 @@ object Launcher : JPanel(MigLayout("wrap 2, ins 0", "5px[right]10px:push[grow,fi
                 JDropDownActions.Actions.Stop -> client.stop()
                 JDropDownActions.Actions.Show -> client.show()
                 JDropDownActions.Actions.Hide -> client.hide()
-                JDropDownActions.Actions.ExtractConfig -> client.extractConfig(showInputDialog(parent, "Enter config name:"))
+                JDropDownActions.Actions.ExtractConfig -> client.extractConfig(showInputDialog(parent, "Enter config name:", client.config))
                 JDropDownActions.Actions.Clone -> ClientRow(clients, client.clone()).apply { focusOnName(); scrollDown() }
                 JDropDownActions.Actions.Delete -> client.remove().let {
                     columns.forEach { panel.remove(it) }

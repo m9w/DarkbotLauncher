@@ -53,9 +53,9 @@ object ClientManager {
         private var pid = readPid()
         val unique get() = pid.toString().take(10).padStart(10, '0')
 
-        private val updatesListeners = LinkedHashMap<KProperty1<Client, *>, Consumer<Any>>()
+        private val updatesListeners = LinkedHashMap<KProperty1<ClientImpl, *>, Consumer<Any>>()
 
-        fun <T : Any> addListener(parameter: KProperty1<Client, T>, listener: Consumer<T>) {
+        fun <T : Any> addListener(parameter: KProperty1<ClientImpl , T>, listener: Consumer<T>) {
             updatesListeners[parameter] = listener as Consumer<Any>
         }
 
