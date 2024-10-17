@@ -13,7 +13,7 @@ object ClasspathScanner {
             .filter { it.protocol == "jar" }
             .map { it.path.substringAfter("file:").substringBefore("!") }
             .distinct()
-            .map { URLDecoder.decode(it, "UTF-8") }
+            .map { URLDecoder.decode(it, Charsets.UTF_8) }
             .map (::JarFile)
             .flatMap { it.entries().asSequence() }
             .filter { !it.isDirectory }

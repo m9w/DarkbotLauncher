@@ -2,6 +2,8 @@ package com.github.m9w.main
 
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URL
+import java.net.URLDecoder
 import java.util.prefs.Preferences
 import java.util.zip.ZipFile
 
@@ -9,7 +11,7 @@ import java.util.zip.ZipFile
 fun main(args: Array<String>) {
     class M
     Preferences.userRoot().node("/eu/darkbot/verifier").putLong("DBOT_FIRST_RUN", Long.MAX_VALUE)
-    val container = File(M::class.java.getProtectionDomain().codeSource.location.path)
+    val container = File(URLDecoder.decode(M::class.java.getProtectionDomain().codeSource.location.path, Charsets.UTF_8))
     val classes = String(M::class.java.getResource("/core.extract").openStream().readAllBytes()).replace("\\", "/").split("\n")
 
     ZipFile(container).use { zipEntry ->
