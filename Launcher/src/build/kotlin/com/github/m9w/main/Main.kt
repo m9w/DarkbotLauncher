@@ -2,7 +2,6 @@ package com.github.m9w.main
 
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URL
 import java.net.URLDecoder
 import java.util.prefs.Preferences
 import java.util.zip.ZipFile

@@ -5,7 +5,6 @@ import com.github.m9w.customeventbroker.CustomEvent
 import com.github.m9w.customeventbroker.CustomEventHandler
 import com.github.m9w.intergation.CustomEventRoutingHandler
 import com.github.manolo8.darkbot.Main
-import com.github.manolo8.darkbot.gui.MainGui
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar
 import com.github.manolo8.darkbot.gui.titlebar.TrayButton
 import eu.darkbot.api.events.Listener

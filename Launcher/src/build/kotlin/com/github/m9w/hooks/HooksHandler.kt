@@ -3,7 +3,6 @@ package com.github.m9w.hooks
 import com.github.m9w.scanner.ClasspathScanner
 import java.io.IOException
 import java.net.URL
-import java.util.stream.Stream
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.hasAnnotation
 

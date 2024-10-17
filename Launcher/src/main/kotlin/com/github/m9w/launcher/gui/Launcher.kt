@@ -1,6 +1,5 @@
 package com.github.m9w.launcher.gui
 
-import com.github.m9w.launcher.dao.Client
 import com.github.m9w.launcher.dao.ClientFlags
 import com.github.m9w.launcher.gui.GUI.ICON
 import com.github.m9w.launcher.gui.components.JDropDown
