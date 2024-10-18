@@ -1,3 +1,25 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/Bot.java b/src/main/java/com/github/manolo8/darkbot/Bot.java
+index b8d822b6..60efa721 100644
+--- a/src/main/java/com/github/manolo8/darkbot/Bot.java
++++ b/src/main/java/com/github/manolo8/darkbot/Bot.java
+@@ -94,7 +94,7 @@ public class Bot {
+                 return new Permissions();
+             }
+         });
+-        System.setSecurityManager(new SecurityManager() {
++        /*System.setSecurityManager(new SecurityManager() {
+             @Override
+             public void checkPermission(Permission perm) {
+                 if (perm.getName().equals("setPolicy") || perm.getName().equals("setSecurityManager"))
+@@ -104,7 +104,7 @@ public class Bot {
+                 if (perm.getName().startsWith("loadLibrary.") ||
+                         perm.getName().equals("createClassLoader")) super.checkPermission(perm);
+             }
+-        });
++        });*/
+     }
+
+     public static class DarkLaf extends FlatDarkLaf {
 diff --git a/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginHandler.java b/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginHandler.java
 index 7c924460..fb5ebedc 100644
 --- a/src/main/java/com/github/manolo8/darkbot/extensions/plugins/PluginHandler.java
