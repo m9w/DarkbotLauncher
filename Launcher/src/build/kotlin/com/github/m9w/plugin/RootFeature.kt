@@ -3,7 +3,7 @@ package com.github.m9w.plugin
 import com.github.m9w.ReflectTool
 import com.github.m9w.customeventbroker.CustomEvent
 import com.github.m9w.customeventbroker.CustomEventHandler
-import com.github.m9w.intergation.CustomEventRoutingHandler
+import com.github.m9w.integration.CustomEventRoutingHandler
 import com.github.manolo8.darkbot.Main
 import com.github.manolo8.darkbot.gui.titlebar.MainTitleBar
 import com.github.manolo8.darkbot.gui.titlebar.TrayButton
@@ -26,18 +26,10 @@ class RootFeature : Task, Listener {
             shouldMinimize = false
             System.setProperty("TRAY", "false")
         }
-        customEventHandler()
     }
 
     override fun onBackgroundTick() {
-        customEventHandler()
         CustomEventRoutingHandler.onBackgroundTick()
-    }
-
-    private fun customEventHandler() {
-        synchronized(CustomEventRoutingHandler) {
-            CustomEventRoutingHandler.onTickTask()
-        }
     }
 
     @CustomEventHandler("LAUNCHER")

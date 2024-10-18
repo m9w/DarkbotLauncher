@@ -1,9 +1,14 @@
-package com.github.m9w.intergation
+package com.github.m9w.integration
 
 import com.github.m9w.customeventbroker.CustomEvent
 import com.github.m9w.customeventbroker.CustomEventBroker
 import com.github.m9w.customeventbroker.CustomEventHandler
+import com.github.m9w.hooks.AfterApiInit
+import com.github.m9w.hooks.EachBotTick
+import com.github.manolo8.darkbot.Main
+import eu.darkbot.api.API.Singleton
 import eu.darkbot.api.events.Listener
+import eu.darkbot.impl.PluginApiImpl
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -15,7 +20,7 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.concurrent.Volatile
 
-object CustomEventRoutingHandler : Listener {
+object CustomEventRoutingHandler : Listener, Singleton {
     private val PORT = System.getProperty("PORT", "-1").toInt()
     private val buffer = PooledByteBufAllocator.DEFAULT.buffer()
     private val sendQueue = LinkedList<ByteBuffer>()
@@ -57,6 +62,7 @@ object CustomEventRoutingHandler : Listener {
         }
     }
 
+    @EachBotTick
     fun onTickTask() {
         if (!isActive) return
         try {
@@ -94,7 +100,9 @@ object CustomEventRoutingHandler : Listener {
         val data = ByteArray(offset).also(buffer::readBytes)
         val i = data.indexOf(58)
         try {
-            CustomEvent(decode(String(data, 0, i)), decode(String(data, i + 1, data.size - i - 2)))
+            Main.INSTANCE.addTask {
+                CustomEvent(decode(String(data, 0, i)), decode(String(data, i + 1, data.size - i - 2)))
+            }
         } finally {
             if (buffer.readableBytes() == 0) buffer.clear()
         }

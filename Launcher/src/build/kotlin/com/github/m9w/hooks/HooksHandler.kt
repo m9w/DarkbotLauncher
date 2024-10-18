@@ -15,6 +15,8 @@ object HooksHandler {
         applyHook<BeforeMain>()
     }
 
+    fun eachTick() = applyHook<EachBotTick>()
+
     fun beforeApiInit() = applyHook<BeforeApiInit>()
 
     fun afterApiInit() = applyHook<AfterApiInit>()

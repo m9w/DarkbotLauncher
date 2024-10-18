@@ -1,1 +1,2 @@
 com.github.m9w.builtin.FeatureHandlerLoader
+com.github.m9w.integration.CustomEventRoutingHandler
