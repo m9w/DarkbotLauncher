@@ -1,0 +1,25 @@
+diff --git a/src/main/java/com/github/manolo8/darkbot/config/Config.java b/src/main/java/com/github/manolo8/darkbot/config/Config.java
+index 6cf20b58..88335386 100644
+--- a/src/main/java/com/github/manolo8/darkbot/config/Config.java
++++ b/src/main/java/com/github/manolo8/darkbot/config/Config.java
+@@ -204,6 +204,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
+         public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_RADIATION = true;
+         public @Option @Visibility(Level.INTERMEDIATE) boolean USERNAME_ON_TITLE = false;
+         public @Option @Visibility(Level.ADVANCED) boolean AUTO_REFINE = false;
++        public @Option @Visibility(Level.DEVELOPER) java.io.File PLUGIN_HANDLE = new java.io.File("");
+     }
+ 
+     public @Option BotSettings BOT_SETTINGS = new BotSettings();
+diff --git a/src/main/resources/lang/strings_en.properties b/src/main/resources/lang/strings_en.properties
+index b6ed3d1d..c47cd58b 100644
+--- a/src/main/resources/lang/strings_en.properties
++++ b/src/main/resources/lang/strings_en.properties
+@@ -223,6 +223,8 @@ config.miscellaneous.username_on_title=Add username to application title
+ config.miscellaneous.username_on_title.desc=Adds your in-game name to application title e.g. visibility on task manager
+ config.miscellaneous.auto_refine=Auto refine (API-specific)
+ config.miscellaneous.auto_refine.desc=Automatically refine raw materials in ship.\nNOTE: only DarkHook (experimental) & DarkTanos (linux) APIs include support.
++config.miscellaneous.plugin_handle=Handle external plugin
++config.miscellaneous.plugin_handle.desc=Automatically detect change and copy file to "plugins/updates" dir and reload plugins.
+ 
+ config.bot_settings=Bot settings
+ 

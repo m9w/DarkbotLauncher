@@ -3,12 +3,10 @@ package com.github.m9w.integration
 import com.github.m9w.customeventbroker.CustomEvent
 import com.github.m9w.customeventbroker.CustomEventBroker
 import com.github.m9w.customeventbroker.CustomEventHandler
-import com.github.m9w.hooks.AfterApiInit
 import com.github.m9w.hooks.EachBotTick
 import com.github.manolo8.darkbot.Main
 import eu.darkbot.api.API.Singleton
 import eu.darkbot.api.events.Listener
-import eu.darkbot.impl.PluginApiImpl
 import io.netty.buffer.PooledByteBufAllocator
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -63,7 +61,7 @@ object CustomEventRoutingHandler : Listener, Singleton {
     }
 
     @EachBotTick
-    fun onTickTask() {
+    fun tick() {
         if (!isActive) return
         try {
             selector.select {
@@ -124,7 +122,7 @@ object CustomEventRoutingHandler : Listener, Singleton {
     @CustomEventHandler("?echo")
     fun echo() = CustomEvent("!echo", unique)
 
-    fun onBackgroundTick() {
+    fun backgroundTick() {
         if (!isActive && lastAttemptInstall + 1000 < System.currentTimeMillis()) {
             uninstall()
             install()

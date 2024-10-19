@@ -33,55 +33,27 @@ class ReflectTool<T> private constructor(private val targetClass: Class<T>) {
     }
 
     inner class _Method<U> internal constructor(name: String, vararg obj: Class<*>) {
-        private val method: Method
+        private val method: Method = targetClass.getDeclaredMethod(name, *obj)
 
         init {
-            try {
-                method = targetClass.getDeclaredMethod(name, *obj)
-                method.isAccessible = true
-            } catch (e: NoSuchMethodException) {
-                throw RuntimeException(e)
-            }
+            method.isAccessible = true
         }
 
-        operator fun invoke(vararg obj: Any?): U {
-            return try {
-                method.invoke(targetObject, *obj) as U
-            } catch (e: InvocationTargetException) {
-                throw RuntimeException(e)
-            } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
-            }
-        }
+        operator fun invoke(vararg obj: Any?) = method.invoke(targetObject, *obj) as U
     }
 
     inner class _Field<U> internal constructor(name: String) {
-        private val field: Field
+        private val field: Field = targetClass.getDeclaredField(name)
 
         init {
-            try {
-                field = targetClass.getDeclaredField(name)
-                field.isAccessible = true
-            } catch (e: NoSuchFieldException) {
-                throw RuntimeException(e)
-            }
+            field.isAccessible = true
         }
 
         fun set(obj: U) {
-            try {
-                field[targetObject] = obj
-            } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
-            }
+            field[targetObject] = obj
         }
 
-        fun get(): U {
-            return try {
-                field[targetObject] as U
-            } catch (e: IllegalAccessException) {
-                throw RuntimeException(e)
-            }
-        }
+        fun get() = field[targetObject] as U
     }
 
     companion object {
