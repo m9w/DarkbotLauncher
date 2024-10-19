@@ -10,7 +10,7 @@ object BuildManager {
     private val javaBin = System.getProperty("java.home") + listOf("", "bin", "").joinToString(File.separator)
 
     fun build(version: String, patches: List<Patch>) {
-        run(listOf("git", "submodule", "update"))
+        PatchManager.updateSubmodules()
         File("release").mkdirs()
         patches.forEach(PatchManager::applyPatch)
         runGradle(version, "jar")

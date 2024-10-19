@@ -1,17 +1,30 @@
 diff --git a/src/main/java/com/github/manolo8/darkbot/config/Config.java b/src/main/java/com/github/manolo8/darkbot/config/Config.java
-index 6cf20b58..88335386 100644
+index ae05ee05..0607cea8 100644
 --- a/src/main/java/com/github/manolo8/darkbot/config/Config.java
 +++ b/src/main/java/com/github/manolo8/darkbot/config/Config.java
 @@ -204,6 +204,7 @@ public class Config implements eu.darkbot.api.config.legacy.Config {
          public @Option @Visibility(Level.INTERMEDIATE) boolean AVOID_RADIATION = true;
          public @Option @Visibility(Level.INTERMEDIATE) boolean USERNAME_ON_TITLE = false;
          public @Option @Visibility(Level.ADVANCED) boolean AUTO_REFINE = false;
-+        public @Option @Visibility(Level.DEVELOPER) java.io.File PLUGIN_HANDLE = new java.io.File("");
++        public @Option @Visibility(Level.DEVELOPER) java.io.File PLUGIN_HANDLE = null;
      }
- 
+
      public @Option BotSettings BOT_SETTINGS = new BotSettings();
+diff --git a/src/main/java/com/github/manolo8/darkbot/gui/tree/editors/FileEditor.java b/src/main/java/com/github/manolo8/darkbot/gui/tree/editors/FileEditor.java
+index a29c286d..ef744bf0 100644
+--- a/src/main/java/com/github/manolo8/darkbot/gui/tree/editors/FileEditor.java
++++ b/src/main/java/com/github/manolo8/darkbot/gui/tree/editors/FileEditor.java
+@@ -25,7 +25,7 @@ public class FileEditor extends JButton implements OptionEditor<File> {
+
+     public FileEditor() {
+         addActionListener(e -> {
+-            if (fc == null) fc = FileChooserUtil.getChooser(file.getPath());
++            if (fc == null) fc = FileChooserUtil.getChooser(file != null ? file.getPath() : null);
+             JTree tree = (JTree) SwingUtilities.getAncestorOfClass(JTree.class, FileEditor.this);
+             TreePath path = tree.getEditingPath();
+             if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 diff --git a/src/main/resources/lang/strings_en.properties b/src/main/resources/lang/strings_en.properties
-index b6ed3d1d..c47cd58b 100644
+index 0397e597..65c93b59 100644
 --- a/src/main/resources/lang/strings_en.properties
 +++ b/src/main/resources/lang/strings_en.properties
 @@ -223,6 +223,8 @@ config.miscellaneous.username_on_title=Add username to application title

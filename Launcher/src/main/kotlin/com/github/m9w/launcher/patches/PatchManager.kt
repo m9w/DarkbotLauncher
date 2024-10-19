@@ -9,6 +9,10 @@ object PatchManager {
     private val patchFiles get() = (File("Patches").listFiles { _, n -> n.endsWith(".patch") } ?: emptyArray()).asSequence().toList()
     private val userName get() = LauncherProperties.getProperty("author", "user").replace("-|\\s".toRegex(), "_")
 
+    fun updateSubmodules() {
+        BuildManager.run(listOf("git", "submodule", "update", "--recursive", "--remote"))
+    }
+
     fun storeChangesAsPatch(name: String) {
         val clearName = name.replace("\\s".toRegex(), "_")
         BuildManager.run(listOf("git", "submodule", "foreach", "git diff -p -B -M -C HEAD > ../Patches/$userName-\$name-$clearName.patch"))
