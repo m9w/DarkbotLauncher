@@ -13,6 +13,7 @@ import java.util.stream.Stream
 object FeatureHandlerLoader : FeatureHandler<Any>() {
     @AfterApiInit
     fun inject() {
+        Main.INSTANCE.config.BOT_SETTINGS.OTHER.SHOW_INSTRUCTIONS = false
         Main.INSTANCE.pluginAPI.addInstance(this)
         val registry = Main.INSTANCE.pluginAPI.requireInstance(FeatureRegisterHandler::class.java)
         ReflectTool.of(registry).getField<MutableList<FeatureHandler<Any>>>("FEATURE_HANDLERS").add(this)
